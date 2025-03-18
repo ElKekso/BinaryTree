@@ -10,6 +10,11 @@ class Node
   end
 
   def <=>(other)
-    @data <=> other.data
+    self.data <=> other.data
+  end
+
+  def clear_connections
+    @left = nil
+    @right = nil
   end
 end
