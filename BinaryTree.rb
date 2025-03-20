@@ -169,4 +169,25 @@ class Tree
     node.right.nil? ? ret_right = nil : ret_right = find(data, node.right)
     ret_left.nil? ? ret_right : ret_left
   end
+
+  def level_order(&block)
+    queue = Queue.new
+    queue << @root
+    ret_arr = Array.new if !block_given?
+
+    while !queue.empty?
+      node = queue.pop
+
+      if block_given?
+        yield(node)
+      else
+        ret_arr.push(node.data)
+      end
+      
+      queue.push(node.right) if !node.right.nil?
+      queue.push(node.left) if !node.left.nil?
+    end
+
+    return ret_arr if !block_given?
+  end
 end
