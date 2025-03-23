@@ -12,7 +12,6 @@ class Tree
     return nil if arr.empty?
 
     mid = arr.length / 2
-    puts(mid)
     root = Node.new(arr[mid])
 
     root.left = build_tree(arr[0..mid - 1]) if mid > 0
@@ -95,7 +94,6 @@ class Tree
           current = current.left
         end
       end
-      
     end
   end 
 
@@ -184,10 +182,104 @@ class Tree
         ret_arr.push(node.data)
       end
       
-      queue.push(node.right) if !node.right.nil?
       queue.push(node.left) if !node.left.nil?
+      queue.push(node.right) if !node.right.nil?
     end
 
     return ret_arr if !block_given?
   end
+
+  def preorder(node = @root, &block)
+    return [] if node.nil?
+    ret_arr = Array.new if !block_given?
+
+    if block_given?
+      yield(node)
+    else
+      ret_arr.push(node.data)
+    end
+    
+    pre_left = preorder(node.left, &block)
+    pre_right = preorder(node.right, &block)
+    ret_arr << pre_left if !block_given?
+    ret_arr << pre_right if !block_given?
+    
+    return ret_arr.flatten if !block_given?
+  end
+
+  def inorder(node = @root, &block)
+    return [] if node.nil?
+    ret_arr = Array.new if !block_given?
+
+    in_left = inorder(node.left, &block)
+    in_right = inorder(node.right, &block)
+    ret_arr << in_left if !block_given?
+
+    if block_given?
+      yield(node)
+    else
+      ret_arr.push(node.data)
+    end
+    
+    ret_arr << in_right if !block_given?
+    
+    return ret_arr.flatten if !block_given?
+  end
+
+  def postorder(node = @root, &block)
+    return [] if node.nil?
+    ret_arr = Array.new if !block_given?
+
+    post_left = postorder(node.left, &block)
+    post_right = postorder(node.right, &block)
+    ret_arr << post_left if !block_given?
+    ret_arr << post_right if !block_given?
+
+    if block_given?
+      yield(node)
+    else
+      ret_arr.push(node.data)
+    end
+    
+    return ret_arr.flatten if !block_given?
+  end
+
+  def height(node)
+    return 0 if node.nil?
+    height = 0
+    ln = !node.left.nil?
+    lr = !node.right.nil?
+    left = height(node.left) if ln
+    right = height(node.right).to_i if lr
+    left.to_i > right.to_i ? height += left : height += right.to_i
+    height += 1 if ln || lr
+    return height
+  end
+
+  def depth(node, level = 0, current = @root)
+    return 0 if current.nil?
+    return level if node == current
+    level += 1
+    ret_left = depth(node, level, current.left)
+    ret_right = depth(node, level, current.right)
+    ret_left > ret_right ? ret_left : ret_right
+  end
+
+  def balanced?
+    queue = Queue.new
+    queue.push(@root)
+    while !queue.empty? do
+      node = queue.pop
+      left, right = node.left, node.right
+      return false if (height(left) - height(right)).abs > 1
+      queue.push(left) if !left.nil?
+      queue.push(right) if !right.nil?
+    end
+    return true
+  end
+
+  def rebalance
+    @root = self.build_tree(self.level_order)
+  end
 end
+
